@@ -21,11 +21,25 @@ function Base.show(io::IO, m::MIME"text/html", g::SavedGif)
     println(io, "<img src=\"$(g.filename)\">")
 end
 
+"""
+    GifSimulator(<keyword arguments>)
+
+Create a simulator for producing a gif output by calling `POMDPModelTools.render` at each step.
+
+# Keyword Arguments
+- `filename::String=tempname()*".gif"`
+- `fps::Int=2`: frames per second
+- `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
+- `max_steps::Int=nothing`
+- `rng::AbstractRNG=GLOBAL_RNG`
+- `show_progress::Bool`
+- `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
+"""
 @with_kw mutable struct GifSimulator <: Simulator
     filename::String                = tempname()*".gif"
     fps::Int                        = 2
     spec::Union{Nothing, Any}       = nothing
-    max_steps::Union{Nothing, Any}  = nothing
+    max_steps::Union{Nothing, Int}  = nothing
     rng::AbstractRNG                = Random.GLOBAL_RNG
     show_progress::Bool             = max_steps != nothing
     render_kwargs                   = NamedTuple()
@@ -40,31 +54,79 @@ function POMDPs.simulate(s::GifSimulator, m::Union{MDP, POMDP}, p::Policy=Random
                          )
     hist = simulate(sim, m, p, args...)
 
-    # deal with the spec
-    if s.spec == nothing
-        steps = eachstep(hist)
-    else
-        steps = eachstep(hist, s.spec)
-    end
-
-    # create gif
-    frames = Frames(MIME("image/png"), fps=2)
-    @showprogress 0.1 "Rendering $(length(steps)) steps..." for step in steps
-        push!(frames, render(m, step; pairs(s.render_kwargs)...))
-    end
-    if s.show_progress
-        @info "Creating Gif..."
-    end
-    write(s.filename, frames)
-    if s.show_progress
-        @info "Done Creating Gif."
-    end
-    return SavedGif(s.filename)
+    makegif(m, hist,
+            filename=s.filename,
+            spec=s.spec,
+            show_progress=s.show_progress,
+            render_kwargs=s.render_kwargs,
+            fps=s.fps
+           )
 end
 
+"""
+    makegif(m; kwargs...)
+    makegif(m, policy; kwargs...)
+    makegif(m, policy, args...; kwargs...)
+
+Create a gif of a single simulation of a POMDP or MDP by calling `POMDPModelTools.render` at each step.
+
+# Arguments
+- `m::Union{POMDP,MDP}`: the model to be simulated
+
+All other positional arguments, for instance a policy, updater, initial state, etc. will be fed to the `simulate` function. See that documentation for more info.
+
+# Keyword Arguments
+All keyword arguments are fed to the `GifSimulator` constructor. See its documentation for more info.
+"""
 function makegif(args...; kwargs...)
     sim = GifSimulator(;kwargs...)
     return simulate(sim, args...)
+end
+
+"""
+    makegif(m, history; kwargs...)
+
+Create a gif from a POMDP or MDP and a history by calling `POMDPModelTools.render` at each step.
+
+# Arguments
+- `m::Union{POMDP,MDP}`: domain model
+- `history::POMDPSimulators.SimHistory`: history of states, actions, etc. for the gif
+
+# Keyword Arguments
+- `filename::String=tempname()*".gif"`
+- `fps::Int=2`: frames per second
+- `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
+- `show_progress::Bool`
+- `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
+"""
+function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
+                 filename=tempname()*".gif",
+                 spec=nothing,
+                 show_progress::Bool=true,
+                 render_kwargs=NamedTuple(),
+                 fps::Int=2
+                )
+
+    # deal with the spec
+    if spec == nothing
+        steps = eachstep(hist)
+    else
+        steps = eachstep(hist, spec)
+    end
+
+    # create gif
+    frames = Frames(MIME("image/png"), fps=fps)
+    @showprogress 0.1 "Rendering $(length(steps)) steps..." for step in steps
+        push!(frames, render(m, step; pairs(render_kwargs)...))
+    end
+    if show_progress
+        @info "Creating Gif..."
+    end
+    write(filename, frames)
+    if show_progress
+        @info "Done Creating Gif."
+    end
+    return SavedGif(filename)
 end
 
 end # module
