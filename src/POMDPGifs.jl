@@ -1,9 +1,17 @@
 module POMDPGifs
 
 using Reel
+using POMDPs
 using POMDPSimulators
 using POMDPModelTools
+using POMDPPolicies
 using ProgressMeter
+using Parameters
+using Random
+
+export
+    GifSimulator,
+    makegif
 
 struct SavedGif
     filename::String
@@ -19,18 +27,18 @@ end
     spec::Union{Nothing, Any}       = nothing
     max_steps::Union{Nothing, Any}  = nothing
     rng::AbstractRNG                = Random.GLOBAL_RNG
-    show_progress::Bool             = true
+    show_progress::Bool             = max_steps != nothing
     render_kwargs                   = NamedTuple()
 end
 
-function simulate(s::GifSimulator, m::Union{MDP, POMDP}, args...)
+function POMDPs.simulate(s::GifSimulator, m::Union{MDP, POMDP}, p::Policy=RandomPolicy(m, rng=s.rng), args...)
 
     # run simulation
     sim = HistoryRecorder(rng = s.rng,
                           max_steps = s.max_steps,
                           show_progress = s.show_progress
                          )
-    hist = simulate(sim, m, args...)
+    hist = simulate(sim, m, p, args...)
 
     # deal with the spec
     if s.spec == nothing
@@ -41,13 +49,13 @@ function simulate(s::GifSimulator, m::Union{MDP, POMDP}, args...)
 
     # create gif
     frames = Frames(MIME("image/png"), fps=2)
-    @showprogress 0.1 "Rendering..." for step in steps
+    @showprogress 0.1 "Rendering $(length(steps)) steps..." for step in steps
         push!(frames, render(m, step; pairs(s.render_kwargs)...))
     end
     if s.show_progress
         @info "Creating Gif..."
     end
-    write(frames, s.filename)
+    write(s.filename, frames)
     if s.show_progress
         @info "Done Creating Gif."
     end
@@ -55,7 +63,7 @@ function simulate(s::GifSimulator, m::Union{MDP, POMDP}, args...)
 end
 
 function makegif(args...; kwargs...)
-    sim = GifSimulator(kwargs...)
+    sim = GifSimulator(;kwargs...)
     return simulate(sim, args...)
 end
 
