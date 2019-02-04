@@ -116,8 +116,10 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
 
     # create gif
     frames = Frames(MIME("image/png"), fps=fps)
-    @showprogress 0.1 "Rendering $(length(steps)) steps..." for step in steps
+    if show_progress; p = Progress(length(steps), 0.1, "Rendering $(length(steps)) steps...") end
+    for step in steps
         push!(frames, render(m, step; pairs(render_kwargs)...))
+        if show_progress; next!(p) end
     end
     if show_progress
         @info "Creating Gif..."
