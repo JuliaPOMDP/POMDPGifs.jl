@@ -33,6 +33,8 @@ Create a simulator for producing a gif output by calling `POMDPModelTools.render
 - `max_steps::Int=nothing`
 - `rng::AbstractRNG=GLOBAL_RNG`
 - `show_progress::Bool`
+- `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
+- `extra_final::Boll` if set to true, the simulator adds an extra setp at the end (after the last transition)
 - `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
 """
 @with_kw mutable struct GifSimulator <: Simulator
@@ -42,6 +44,8 @@ Create a simulator for producing a gif output by calling `POMDPModelTools.render
     max_steps::Union{Nothing, Int}  = nothing
     rng::AbstractRNG                = Random.GLOBAL_RNG
     show_progress::Bool             = max_steps != nothing
+    extra_initial::Bool             = false
+    extra_final::Bool               = false
     render_kwargs                   = NamedTuple()
 end
 
@@ -58,6 +62,8 @@ function POMDPs.simulate(s::GifSimulator, m::Union{MDP, POMDP}, p::Policy=Random
             filename=s.filename,
             spec=s.spec,
             show_progress=s.show_progress,
+            extra_initial=s.extra_initial,
+            extra_final=s.extra_final,
             render_kwargs=s.render_kwargs,
             fps=s.fps
            )
@@ -97,12 +103,16 @@ Create a gif from a POMDP or MDP and a history by calling `POMDPModelTools.rende
 - `fps::Int=2`: frames per second
 - `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
 - `show_progress::Bool`
+- `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
+- `extra_final::Boll` if set to true, the simulator adds an extra setp at the end (after the last transition)
 - `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
 """
 function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
                  filename=tempname()*".gif",
                  spec=nothing,
                  show_progress::Bool=true,
+                 extra_initial::Bool=false,
+                 extra_final::Bool=false,
                  render_kwargs=NamedTuple(),
                  fps::Int=2
                 )
@@ -114,11 +124,23 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
         steps = eachstep(hist, spec)
     end
 
+    if extra_initial
+      first_step = first(steps)
+      extra_init_step = (t=0, sp=get(first_step, :s, missing), bp=get(first_step, :b, missing))
+      steps = vcat(extra_init_step, collect(steps))
+    end
+    if extra_final
+      last_step = last(steps)
+      extra_final_step = (t=length(steps)+1, s=get(last_step, :sp, missing), b=get(last_step, :bp, missing), done=true)
+      steps = vcat(collect(steps), extra_final_step)
+    end
+
     # create gif
     frames = Frames(MIME("image/png"), fps=fps)
     if show_progress
         p = Progress(length(steps), 0.1, "Rendering $(length(steps)) steps...")
     end
+
     for step in steps
         push!(frames, render(m, step; pairs(render_kwargs)...))
         if show_progress
