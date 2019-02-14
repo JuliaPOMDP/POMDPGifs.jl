@@ -104,7 +104,7 @@ Create a gif from a POMDP or MDP and a history by calling `POMDPModelTools.rende
 - `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
 - `show_progress::Bool`
 - `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
-- `extra_final::Boll` if set to true, the simulator adds an extra setp at the end (after the last transition)
+- `extra_final::Bool` if set to true, the simulator adds an extra setp at the end (after the last transition)
 - `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
 """
 function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
@@ -125,14 +125,14 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
     end
 
     if extra_initial
-      first_step = first(steps)
-      extra_init_step = (t=0, sp=get(first_step, :s, missing), bp=get(first_step, :b, missing))
-      steps = vcat(extra_init_step, collect(steps))
+        first_step = first(steps)
+        extra_init_step = (t=0, sp=get(first_step, :s, missing), bp=get(first_step, :b, missing))
+        steps = vcat(extra_init_step, collect(steps))
     end
     if extra_final
-      last_step = last(steps)
-      extra_final_step = (t=length(steps)+1, s=get(last_step, :sp, missing), b=get(last_step, :bp, missing), done=true)
-      steps = vcat(collect(steps), extra_final_step)
+        last_step = last(steps)
+        extra_final_step = (t=length(steps)+1, s=get(last_step, :sp, missing), b=get(last_step, :bp, missing), done=true)
+        steps = vcat(collect(steps), extra_final_step)
     end
 
     # create gif
