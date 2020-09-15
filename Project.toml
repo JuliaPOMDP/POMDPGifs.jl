@@ -13,9 +13,12 @@ ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Reel = "71555da5-176e-5e73-a222-aebc6c6e4f2f"
 
+[compat]
+POMDPs = "0.9"
+
 [extras]
-POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
 Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
+POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
 
 [targets]
 test = ["POMDPModels", "Cairo"]
