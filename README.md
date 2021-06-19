@@ -1,6 +1,6 @@
 # POMDPGifs.jl
 
-[![Build Status](https://travis-ci.org/JuliaPOMDP/POMDPGifs.jl.svg?branch=master)](https://travis-ci.org/JuliaPOMDP/POMDPGifs.jl)
+[![Build status](https://github.com/JuliaPOMDP/POMDPGifs.jl/workflows/CI/badge.svg)](https://github.com/JuliaPOMDP/POMDPGifs.jl/actions)
 
 Utilities for generating gifs of [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) models.
 
