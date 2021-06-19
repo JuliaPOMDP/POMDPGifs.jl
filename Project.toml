@@ -15,6 +15,12 @@ Reel = "71555da5-176e-5e73-a222-aebc6c6e4f2f"
 
 [compat]
 Reel = "1.3"
+Parameters = "0.12"
+POMDPs = "0.9"
+POMDPSimulators = "0.3"
+POMDPPolicies = "0.3"
+POMDPModelTools = "0.3"
+ProgressMeter = "1.3"
 
 [extras]
 Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
