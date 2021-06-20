@@ -1,7 +1,7 @@
 name = "POMDPGifs"
 uuid = "7f35509c-0cb9-11e9-0708-2928828cdbb7"
 authors = ["Zachary Sunberg <sunbergzach@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 POMDPModelTools = "08074719-1b2a-587c-a292-00f91cc44415"
