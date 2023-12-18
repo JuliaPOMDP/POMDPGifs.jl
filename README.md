@@ -1,6 +1,7 @@
 # POMDPGifs.jl
 
-[![Build status](https://github.com/JuliaPOMDP/POMDPGifs.jl/workflows/CI/badge.svg)](https://github.com/JuliaPOMDP/POMDPGifs.jl/actions)
+[![CI](https://github.com/JuliaPOMDP/POMDPGifs.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/JuliaPOMDP/POMDPGifs.jl/actions/workflows/CI.yml)
+[![codecov.io](http://codecov.io/github/JuliaPOMDP/POMDPGifs.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaPOMDP/POMDPGifs.jl?branch=master)
 
 Utilities for generating gifs of [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) models.
 
@@ -8,7 +9,8 @@ Utilities for generating gifs of [POMDPs.jl](https://github.com/JuliaPOMDP/POMDP
 
 In the julia REPL:
 ```julia
-import Pkg; Pkg.add("POMDPGifs")
+using Pkg
+Pkg.add("POMDPGifs")
 ```
 
 ## Documentation
@@ -43,7 +45,7 @@ Create a gif of a single simulation of a POMDP or MDP by calling `POMDPModelTool
 **Arguments:**
 - `m::Union{POMDP,MDP}`: the model to be simulated
 
-All other positional arguments, for instance a policy, updater, initial state, etc. will be fed to the `simulate` function. See [POMDPSimulators documentation](https://juliapomdp.github.io/POMDPSimulators.jl/latest/) for more info.
+All other positional arguments, for instance a policy, updater, initial state, etc. will be fed to the `simulate` function. See [POMDPTools Simulators documentation](https://juliapomdp.github.io/POMDPs.jl/stable/POMDPTools/simulators/) for more info.
 
 **Keyword Arguments**
 All keyword arguments are fed to the `GifSimulator` constructor. See its documentation for more info.
