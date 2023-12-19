@@ -20,18 +20,18 @@ Currently, there are two utilities:
 - A `makegif` convenience function to (1) run a simulation and create a gif, or (2) create a gif from a model.
 
 ### GifSimulator
-`GifSimulator(kwargs...)`. Create a simulator for producing a gif output by calling `POMDPModelTools.render` at each step.
+`GifSimulator(kwargs...)`. Create a simulator for producing a gif output by calling `POMDPTools.render` at each step.
 
 **Keyword Arguments**
 - `filename::String=tempname()*".gif"`
 - `fps::Int=2`: frames per second
-- `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
+- `spec::Any`: specification for which elements of a step to render (see `POMDPTools.eachstep`)
 - `max_steps::Int=nothing`
 - `rng::AbstractRNG=GLOBAL_RNG`
 - `show_progress::Bool`
 - `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
 - `extra_final::Boll` if set to true, the simulator adds an extra setp at the end (after the last transition)
-- `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
+- `render_kwargs`: keyword args to be fed to `POMDPTools.render`
 
 ### makegif
 
@@ -40,7 +40,7 @@ makegif(m; kwargs...)
 makegif(m, policy; kwargs...)
 makegif(m, policy, args...; kwargs...)
 ```
-Create a gif of a single simulation of a POMDP or MDP by calling `POMDPModelTools.render` at each step.
+Create a gif of a single simulation of a POMDP or MDP by calling `POMDPTools.render` at each step.
 
 **Arguments:**
 - `m::Union{POMDP,MDP}`: the model to be simulated
