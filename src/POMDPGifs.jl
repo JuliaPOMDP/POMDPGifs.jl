@@ -41,7 +41,7 @@ Create a simulator for producing a gif output by calling `POMDPTools.render` at 
     spec::Union{Nothing, Any}       = nothing
     max_steps::Union{Nothing, Int}  = nothing
     rng::AbstractRNG                = Random.GLOBAL_RNG
-    show_progress::Bool             = max_steps != nothing
+    show_progress::Bool             = !isnothing(max_steps)
     extra_initial::Bool             = false
     extra_final::Bool               = false
     render_kwargs                   = NamedTuple()
@@ -116,7 +116,7 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPTools.SimHistory;
                 )
 
     # deal with the spec
-    if spec == nothing
+    if isnothing(spec)
         steps = eachstep(hist)
     else
         steps = eachstep(hist, spec)
@@ -136,7 +136,7 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPTools.SimHistory;
     # create gif
     frames = Frames(MIME("image/png"), fps=fps)
     if show_progress
-        p = Progress(length(steps), 0.1, "Rendering $(length(steps)) steps...")
+        p = Progress(length(steps); dt=0.1, desc="Rendering $(length(steps)) steps...")
     end
 
     for step in steps
