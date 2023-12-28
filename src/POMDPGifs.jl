@@ -2,9 +2,7 @@ module POMDPGifs
 
 using Reel
 using POMDPs
-using POMDPSimulators
-using POMDPModelTools
-using POMDPPolicies
+using POMDPTools
 using ProgressMeter
 using Parameters
 using Random
@@ -24,18 +22,18 @@ end
 """
     GifSimulator(<keyword arguments>)
 
-Create a simulator for producing a gif output by calling `POMDPModelTools.render` at each step.
+Create a simulator for producing a gif output by calling `POMDPTools.render` at each step.
 
 # Keyword Arguments
 - `filename::String=tempname()*".gif"`
 - `fps::Int=2`: frames per second
-- `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
+- `spec::Any`: specification for which elements of a step to render (see `POMDPTools.eachstep`)
 - `max_steps::Int=nothing`
 - `rng::AbstractRNG=GLOBAL_RNG`
 - `show_progress::Bool`
 - `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
 - `extra_final::Boll` if set to true, the simulator adds an extra setp at the end (after the last transition)
-- `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
+- `render_kwargs`: keyword args to be fed to `POMDPTools.render`
 """
 @with_kw mutable struct GifSimulator <: Simulator
     filename::String                = tempname()*".gif"
@@ -43,7 +41,7 @@ Create a simulator for producing a gif output by calling `POMDPModelTools.render
     spec::Union{Nothing, Any}       = nothing
     max_steps::Union{Nothing, Int}  = nothing
     rng::AbstractRNG                = Random.GLOBAL_RNG
-    show_progress::Bool             = max_steps != nothing
+    show_progress::Bool             = !isnothing(max_steps)
     extra_initial::Bool             = false
     extra_final::Bool               = false
     render_kwargs                   = NamedTuple()
@@ -74,7 +72,7 @@ end
     makegif(m, policy; kwargs...)
     makegif(m, policy, args...; kwargs...)
 
-Create a gif of a single simulation of a POMDP or MDP by calling `POMDPModelTools.render` at each step.
+Create a gif of a single simulation of a POMDP or MDP by calling `POMDPTools.render` at each step.
 
 # Arguments
 - `m::Union{POMDP,MDP}`: the model to be simulated
@@ -92,22 +90,22 @@ end
 """
     makegif(m, history; kwargs...)
 
-Create a gif from a POMDP or MDP and a history by calling `POMDPModelTools.render` at each step.
+Create a gif from a POMDP or MDP and a history by calling `POMDPTools.render` at each step.
 
 # Arguments
 - `m::Union{POMDP,MDP}`: domain model
-- `history::POMDPSimulators.SimHistory`: history of states, actions, etc. for the gif
+- `history::POMDPTools.SimHistory`: history of states, actions, etc. for the gif
 
 # Keyword Arguments
 - `filename::String=tempname()*".gif"`
 - `fps::Int=2`: frames per second
-- `spec::Any`: specification for which elements of a step to render (see `POMDPSimulators.eachstep`)
+- `spec::Any`: specification for which elements of a step to render (see `POMDPTools.eachstep`)
 - `show_progress::Bool`
 - `extra_initial::Bool` if set to true, the simulator adds an extra step at time 0 (before first transition)
 - `extra_final::Bool` if set to true, the simulator adds an extra setp at the end (after the last transition)
-- `render_kwargs`: keyword args to be fed to `POMDPModelTools.render`
+- `render_kwargs`: keyword args to be fed to `POMDPTools.render`
 """
-function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
+function makegif(m::Union{POMDP, MDP}, hist::POMDPTools.SimHistory;
                  filename=tempname()*".gif",
                  spec=nothing,
                  show_progress::Bool=true,
@@ -118,7 +116,7 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
                 )
 
     # deal with the spec
-    if spec == nothing
+    if isnothing(spec)
         steps = eachstep(hist)
     else
         steps = eachstep(hist, spec)
@@ -138,7 +136,7 @@ function makegif(m::Union{POMDP, MDP}, hist::POMDPSimulators.SimHistory;
     # create gif
     frames = Frames(MIME("image/png"), fps=fps)
     if show_progress
-        p = Progress(length(steps), 0.1, "Rendering $(length(steps)) steps...")
+        p = Progress(length(steps); dt=0.1, desc="Rendering $(length(steps)) steps...")
     end
 
     for step in steps
